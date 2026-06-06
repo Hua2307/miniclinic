@@ -15,6 +15,16 @@
         .status-BOOKED    { color: #F59E0B; font-weight: bold; }
         .status-COMPLETED { color: #10B981; font-weight: bold; }
         .status-CANCELLED { color: #94A3B8; }
+        .stats-grid { display: grid; grid-template-columns: repeat(3, minmax(120px, 1fr)); gap: 12px; margin: 20px 0; }
+        .stats-card { padding: 16px; border: 1px solid #E2E8F0; border-radius: 10px; background: #F8FAFC; }
+        .stats-card h3 { margin: 0 0 8px; font-size: 14px; color: #334155; }
+        .stats-card p { margin: 0; font-size: 24px; font-weight: bold; color: #0F2443; }
+        .by-status { display: flex; gap: 12px; margin-top: 12px; }
+        .by-status span { display: inline-flex; align-items: center; gap: 6px; background: #fff; border: 1px solid #E2E8F0; border-radius: 8px; padding: 10px 12px; font-size: 14px; }
+        .by-status .dot { width: 10px; height: 10px; border-radius: 50%; display: inline-block; }
+        .dot-booked { background: #F59E0B; }
+        .dot-completed { background: #10B981; }
+        .dot-cancelled { background: #94A3B8; }
     </style>
 </head>
 <body>
@@ -30,6 +40,35 @@
             </form>
         </div>
     </header>
+
+    <section class="stats-grid">
+        <div class="stats-card">
+            <h3>醫師總數</h3>
+            <p th:text="${totalDoctors}">0</p>
+        </div>
+        <div class="stats-card">
+            <h3>病患總數</h3>
+            <p th:text="${totalPatients}">0</p>
+        </div>
+        <div class="stats-card">
+            <h3>掛號總數</h3>
+            <p th:text="${totalAppointments}">0</p>
+        </div>
+    </section>
+
+    <section class="stats-grid">
+        <div class="stats-card" style="grid-column: span 3;">
+            <h3>狀態統計</h3>
+            <div class="by-status">
+                <span><span class="dot dot-booked"></span>BOOKED：<strong th:text="${byStatus.BOOKED}">0</strong></span>
+                <span><span class="dot dot-completed"></span>COMPLETED：<strong th:text="${byStatus.COMPLETED}">0</strong></span>
+                <span><span class="dot dot-cancelled"></span>CANCELLED：<strong th:text="${byStatus.CANCELLED}">0</strong></span>
+            </div>
+            <div style="margin-top:12px;">
+                <canvas id="statusChart" width="600" height="160"></canvas>
+            </div>
+        </div>
+    </section>
 
     <h2 th:text="|今日掛號：${today}|"></h2>
 
@@ -116,5 +155,26 @@
                 }
             }
         </script>
-</body>
-</html>
+        <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+        <script th:inline="javascript">
+            var booked = /*[[${byStatus.BOOKED}]]*/ 0;
+            var completed = /*[[${byStatus.COMPLETED}]]*/ 0;
+            var cancelled = /*[[${byStatus.CANCELLED}]]*/ 0;
+
+            const ctx = document.getElementById('statusChart');
+            if (ctx) {
+                new Chart(ctx, {
+                    type: 'bar',
+                    data: {
+                        labels: ['BOOKED','COMPLETED','CANCELLED'],
+                        datasets: [{
+                            label: '數量',
+                            data: [booked, completed, cancelled],
+                            backgroundColor: ['#F59E0B','#10B981','#94A3B8']
+                        }]
+                    },
+                    options: { responsive: true, maintainAspectRatio: false }
+                });
+            }
+            /*]]>*/
+        </script>

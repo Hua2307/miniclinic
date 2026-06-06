@@ -23,4 +23,14 @@ public interface AppointmentRepository extends JpaRepository<Appointment, Long> 
         String getDepartment();
         long getCount();
     }
+
+    interface StatusCount {
+        String getStatus();
+        long getCount();
+    }
+
+    @Query("SELECT a.status AS status, COUNT(a) AS count " +
+        "FROM Appointment a " +
+        "GROUP BY a.status")
+    List<StatusCount> countGroupByStatus();
 }
